@@ -1,0 +1,15 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+jwt:
+  secret: "myVeryLongSecretKeyForJwtTokenGenerationThatIsAtLeast256BitsLong"
+
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.web.servlet: DEBUG
+    com.service.apigateway: DEBUG
