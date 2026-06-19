@@ -20,9 +20,23 @@ public class JwtInterceptor implements HandlerInterceptor {
 
     private static final String[] PUBLIC_PATHS = {
             "/api/auth/register",
-            "/api/auth/login"
+            "/api/auth/login",
+            "/api/products",
+            "/api/products/categories"
     };
 
+    // Публичные методы для приватных путей — например GET /api/products
+    // открыт всем, но POST /api/products (создание товара) должен требовать токен
+    private boolean isPublicRequest(String path, String method) {
+        if (path.startsWith("api/auth/")) {
+            return true;
+        }
+        // Товары и категории открыты на чтение (GET) для всех
+        if (path.startsWith("/api/products")) {
+            return true;
+        }
+        return false;
+    }
     @Override
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response,
@@ -33,7 +47,7 @@ public class JwtInterceptor implements HandlerInterceptor {
         log.debug(">>> Входящий запрос: {} {}", method, path);
 
         // Публичные пути пропускаем без проверки
-        if (isPublicPath(path)) {
+        if (isPublicRequest(path, method)) {
             log.debug(">>> Публичный путь — пропускаем");
             return true; // true = продолжаем обработку запроса
         }
@@ -60,16 +74,9 @@ public class JwtInterceptor implements HandlerInterceptor {
         log.debug(">>> Токен валидный, пользователь: {}", email);
 
         // Добавляем email в атрибуты запроса — downstream сервисы смогут его прочитать
-        request.setAttribute("X-User-Email", email);
+        request.setAttribute("authenticatedEmail", email);
 
         return true;
-    }
-
-    private boolean isPublicPath(String path) {
-        for (String publicPath : PUBLIC_PATHS) {
-            if (path.equals(publicPath)) return true;
-        }
-        return false;
     }
 
     private void sendUnauthorized(HttpServletResponse response,
