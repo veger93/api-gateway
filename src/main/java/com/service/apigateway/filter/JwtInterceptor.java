@@ -28,15 +28,17 @@ public class JwtInterceptor implements HandlerInterceptor {
     // Публичные методы для приватных путей — например GET /api/products
     // открыт всем, но POST /api/products (создание товара) должен требовать токен
     private boolean isPublicRequest(String path, String method) {
-        if (path.startsWith("api/auth/")) {
+        // auth пути — регистрация и логин, всегда публичны
+        if (path.startsWith("/api/auth/")) {
             return true;
         }
-        // Товары и категории открыты на чтение (GET) для всех
-        if (path.startsWith("/api/products")) {
+        // Товары открыты на чтение для всех
+        if (path.startsWith("/api/products") && method.equals("GET")) {
             return true;
         }
         return false;
     }
+
     @Override
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response,
@@ -45,6 +47,13 @@ public class JwtInterceptor implements HandlerInterceptor {
         String path = request.getRequestURI();
         String method = request.getMethod();
         log.debug(">>> Входящий запрос: {} {}", method, path);
+        log.debug(">>> isPublicRequest результат: {}", isPublicRequest(path, method));
+
+        // OPTIONS — preflight CORS запрос от браузера, всегда пропускаем
+        if (method.equals("OPTIONS")) {
+            log.debug(">>> OPTIONS preflight — пропускаем");
+            return true;
+        }
 
         // Публичные пути пропускаем без проверки
         if (isPublicRequest(path, method)) {
