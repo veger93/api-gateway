@@ -72,4 +72,14 @@ public class GatewayConfig {
                 .before(BeforeFilterFunctions.uri("http://localhost:8084"))
                 .build();
     }
+
+    @Bean
+    public RouterFunction<ServerResponse> fileServiceRoute() {
+        return RouterFunctions.route()
+                .route(RequestPredicates.path("/api/files/**"),
+                        HandlerFunctions.http())
+                .before(this::addUserEmailHeader)
+                .before(BeforeFilterFunctions.uri("http://localhost:8085"))
+                .build();
+    }
 }
