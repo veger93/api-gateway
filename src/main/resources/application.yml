@@ -6,7 +6,7 @@ spring:
     name: api-gateway
 
 jwt:
-  secret: "myVeryLongSecretKeyForJwtTokenGenerationThatIsAtLeast256BitsLong"
+  secret: ${JWT_SECRET:myVeryLongSecretKeyForJwtTokenGenerationThatIsAtLeast256BitsLong}
 
 logging:
   level:
