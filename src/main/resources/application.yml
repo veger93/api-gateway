@@ -8,6 +8,15 @@ spring:
 jwt:
   secret: ${JWT_SECRET:myVeryLongSecretKeyForJwtTokenGenerationThatIsAtLeast256BitsLong}
 
+# Локальные адреса по умолчанию
+# В Docker переопределяются через переменные окружения
+services:
+  auth-url: ${AUTH_SERVICE_URL:http://localhost:8081}
+  product-url: ${PRODUCT_SERVICE_URL:http://localhost:8082}
+  order-url: ${ORDER_SERVICE_URL:http://localhost:8083}
+  delivery-url: ${DELIVERY_SERVICE_URL:http://localhost:8084}
+  file-url: ${FILE_SERVICE_URL:http://localhost:8085}
+
 logging:
   level:
     org.springframework.cloud.gateway: TRACE

@@ -2,6 +2,7 @@ package com.service.apigateway.config;
 
 import com.service.apigateway.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions;
 import org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions;
 import org.springframework.context.annotation.Bean;
@@ -18,10 +19,26 @@ public class GatewayConfig {
     @Autowired
     private JwtUtil jwtUtil;
 
-    // Добавляем заголовок X-User-Email если в запросе есть валидный токен
+    // URL сервисов читаем из переменных окружения
+    // Локально → localhost:808x
+    // В Docker → имя_контейнера:808x
+    @Value("${services.auth-url:http://localhost:8081}")
+    private String authServiceUrl;
+
+    @Value("${services.product-url:http://localhost:8082}")
+    private String productServiceUrl;
+
+    @Value("${services.order-url:http://localhost:8083}")
+    private String orderServiceUrl;
+
+    @Value("${services.delivery-url:http://localhost:8084}")
+    private String deliveryServiceUrl;
+
+    @Value("${services.file-url:http://localhost:8085}")
+    private String fileServiceUrl;
+
     private ServerRequest addUserEmailHeader(ServerRequest request) {
         String authHeader = request.headers().firstHeader("Authorization");
-
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             if (jwtUtil.isTokenValid(token)) {
@@ -39,7 +56,7 @@ public class GatewayConfig {
         return RouterFunctions.route()
                 .route(RequestPredicates.path("/api/auth/**"),
                         HandlerFunctions.http())
-                .before(BeforeFilterFunctions.uri("http://localhost:8081"))
+                .before(BeforeFilterFunctions.uri(authServiceUrl))
                 .build();
     }
 
@@ -49,7 +66,7 @@ public class GatewayConfig {
                 .route(RequestPredicates.path("/api/products/**"),
                         HandlerFunctions.http())
                 .before(this::addUserEmailHeader)
-                .before(BeforeFilterFunctions.uri("http://localhost:8082"))
+                .before(BeforeFilterFunctions.uri(productServiceUrl))
                 .build();
     }
 
@@ -59,7 +76,7 @@ public class GatewayConfig {
                 .route(RequestPredicates.path("/api/orders/**"),
                         HandlerFunctions.http())
                 .before(this::addUserEmailHeader)
-                .before(BeforeFilterFunctions.uri("http://localhost:8083"))
+                .before(BeforeFilterFunctions.uri(orderServiceUrl))
                 .build();
     }
 
@@ -69,7 +86,7 @@ public class GatewayConfig {
                 .route(RequestPredicates.path("/api/delivery/**"),
                         HandlerFunctions.http())
                 .before(this::addUserEmailHeader)
-                .before(BeforeFilterFunctions.uri("http://localhost:8084"))
+                .before(BeforeFilterFunctions.uri(deliveryServiceUrl))
                 .build();
     }
 
@@ -79,7 +96,7 @@ public class GatewayConfig {
                 .route(RequestPredicates.path("/api/files/**"),
                         HandlerFunctions.http())
                 .before(this::addUserEmailHeader)
-                .before(BeforeFilterFunctions.uri("http://localhost:8085"))
+                .before(BeforeFilterFunctions.uri(fileServiceUrl))
                 .build();
     }
 }
